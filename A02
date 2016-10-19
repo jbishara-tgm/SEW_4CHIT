@@ -1,0 +1,107 @@
+import threading
+import random
+import math
+
+dict = {
+   " " : " "
+}
+
+for i in range(90-33+1):
+    while(True):
+        r = chr(random.randint(33,90))
+        if r not in dict.values():
+            break
+    dict[chr(i + 33)] = r
+
+threads = 1
+def section():
+    """
+    In dieser Methode wird der Input-Text des Benutzers in mehrere Textteile unterteilt,
+    um diese dann den Threads zu übergeben. Der Gedankengang war folgender, dass ein Text
+    mit einer geraden Anzahl an Zeichen und geraden Anzahl an Threads kein Problem darstellen,
+    diesen Text zu unterteilen (textlänge / threadanzahl). Wird einer dieser Zahlen jedoch ungerade,
+    wird die Anzahl der Zeichen pro Textstück nicht "schön". Es kommen Kommazahlen zustande. Man kann aber
+    einem Thread nicht z.B. 2.34 Zeichen zum übersetzen geben. Deshalb wird falls eine Kommazahl zustande
+    kommt, abgerundet und die Nachkommastellen aller Threads beim ersten Thread addiert. Somit hat jeder Thread
+    eine Anzahl an Zeichen OHNE Kommastellen.
+    :return: eine Liste mit den einzelnen Textteilen (für jedes Thread ein Eintrag)
+    """
+    hilfe = []
+    textteil = []
+    for i in range(threads):
+       hilfe.append(len(text) / threads)
+       textteil.append([])
+
+    for i in range(1, threads):
+        frac, whole = math.modf(hilfe[i])
+        hilfe[0] += frac
+        hilfe[i] = int(whole)
+
+    hilfe[0] = math.ceil(hilfe[0])
+    count = 0
+    for i in range(len(hilfe)):
+        for j in range(hilfe[i]):
+            if (len(text) > count):
+                textteil[i].append(text[count])
+            count += 1
+    return textteil
+
+class A02(threading.Thread):
+    def __init__(self,textteil,modus):
+        """
+
+        :param textteil: 
+        :param modus:
+        """
+        threading.Thread.__init__(self)
+        self.__textteil = textteil
+        self.__modus = int(modus)
+        self.__res = ""
+
+    def encrypt(self, textteil):
+        resE = ""
+        for i in textteil:
+            resE = resE + dict[i]
+        return resE
+
+    def decrypt(self, textteil):
+        resD = ""
+        for i in textteil:
+            for j in dict.keys():
+                if dict[j] == i:
+                    resD = resD + j
+        return resD
+
+    def run(self):
+        if self.__modus == 0:
+            self.__res = self.encrypt(self.__textteil)
+        else:
+            self.__res = self.decrypt(self.__textteil)
+
+    def getRes(self):
+        return self.__res
+
+
+while(True):
+    modus = int(input("was wollen Sie machen? 0 = Encrypt, 1 = Decrypt 2 = Schließen"))
+    if modus == 2:
+        break
+
+    elif modus == 1 or modus == 0:
+        text = input("Bitte deinen gewünschten Text eingeben").upper()
+        anzahl = input("Bitte die Anzahl der gewünschten Threads eingeben")
+        sectionL = section()
+
+        threadsL = []
+        for i in range(threads):
+            thread = A02(sectionL[i], modus)
+            threadsL.append(thread)
+            threadsL[i].start()
+
+        res = ""
+        for i in range(len(threadsL)):
+            threadsL[i].join()
+            res += threadsL[i].getRes()
+
+
+        print(res)
