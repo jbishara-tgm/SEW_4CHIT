@@ -2,10 +2,11 @@ import threading
 import random
 import math
 
+# Leerzeichen bleibt Leerzeichen
 dict = {
    " " : " "
 }
-
+# Dictionary mit random Values wird erstellt
 for i in range(90-33+1):
     while(True):
         r = chr(random.randint(33,90))
@@ -50,8 +51,8 @@ class A02(threading.Thread):
     def __init__(self,textteil,modus):
         """
 
-        :param textteil: 
-        :param modus:
+        :param textteil: Text für 1 Thread
+        :param modus: Was das Programm tun soll (encrypt, decrypt, exit)
         """
         threading.Thread.__init__(self)
         self.__textteil = textteil
@@ -59,12 +60,22 @@ class A02(threading.Thread):
         self.__res = ""
 
     def encrypt(self, textteil):
+        """
+
+        :param textteil: Text für 1 Thread
+        :return: encrypted version des textteils
+        """
         resE = ""
         for i in textteil:
             resE = resE + dict[i]
         return resE
 
     def decrypt(self, textteil):
+        """
+
+        :param textteil: Text für 1 Thread
+        :return: decrypted version des textteils
+        """
         resD = ""
         for i in textteil:
             for j in dict.keys():
@@ -102,6 +113,5 @@ while(True):
         for i in range(len(threadsL)):
             threadsL[i].join()
             res += threadsL[i].getRes()
-
 
         print(res)
